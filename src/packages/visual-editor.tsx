@@ -1,10 +1,34 @@
 // 使用 defineCompoennt可以有更好的类型提示，当然不用是可以的
-import { defineComponent } from 'vue'
+import { computed, defineComponent, PropType } from 'vue'
 import './visual-editor.scss'
+import { VisualEditorModelValue } from '@/packages/visual-editor.utils'
+import { useModel } from '@/packages/utils/useModel'
+import { VisualEditorBlock } from './visual-editor-block'
 
 export const VisualEditor = defineComponent({
-  props: {},
-  setup (props) {
+  components: {
+    VisualEditorBlock
+  },
+  props: {
+    modelValue: {
+      type: Object as PropType<VisualEditorModelValue>,
+      required: true
+    }
+  },
+  emits: {
+    'update:modelValue': (val?: VisualEditorModelValue) => true
+  },
+  setup (props, ctx) {
+
+    const dataModel = useModel(() => props.modelValue, val => ctx.emit('update:modelValue', val))
+
+
+    // 编辑区域 外层宽高
+    const containerStyles = computed(() => ({
+      width: `${dataModel.value.container.width}px`,
+      height: `${dataModel.value.container.height}px`
+    }))
+
     return () => (
       <div class="visual-editor">
         <div class="visual-editor-menu">
@@ -18,7 +42,13 @@ export const VisualEditor = defineComponent({
         </div>
         <div class="visual-editor-body">
           <div class="visual-editor-content">
-            visual-editor-body
+            <div class="visual-eidtor-container" style={containerStyles.value}>
+              { dataModel.value && dataModel.value.blocks && dataModel.value.blocks.length && (
+                dataModel.value.blocks.map((block, index) => (
+                  <VisualEditorBlock block={block} key={index}/>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
