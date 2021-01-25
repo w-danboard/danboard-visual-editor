@@ -1,13 +1,14 @@
 <template>
   <div class="app">
     <h1>这个是页面内容</h1>
-    <visual-editor v-model="jsonData"/>
+    <visual-editor v-model="jsonData" :config="visualConfig"/>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { VisualEditor } from '@/packages/visual-editor';
+import { visualConfig } from '@/visual.config';
 
 
 export default defineComponent({
@@ -17,6 +18,7 @@ export default defineComponent({
   },
   data () {
     return {
+      visualConfig,
       jsonData: {
         container: {
           height: 500,

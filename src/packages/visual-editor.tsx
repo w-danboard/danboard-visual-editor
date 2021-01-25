@@ -1,9 +1,10 @@
 // 使用 defineCompoennt可以有更好的类型提示，当然不用是可以的
 import { computed, defineComponent, PropType } from 'vue'
 import './visual-editor.scss'
-import { VisualEditorModelValue } from '@/packages/visual-editor.utils'
+import { VisualEditorModelValue, VisualEditorConfig } from '@/packages/visual-editor.utils'
 import { useModel } from '@/packages/utils/useModel'
 import { VisualEditorBlock } from './visual-editor-block'
+import component from '*.vue'
 
 export const VisualEditor = defineComponent({
   components: {
@@ -12,6 +13,10 @@ export const VisualEditor = defineComponent({
   props: {
     modelValue: {
       type: Object as PropType<VisualEditorModelValue>,
+      required: true
+    },
+    config: {
+      type: Object as PropType<VisualEditorConfig>,
       required: true
     }
   },
@@ -32,7 +37,10 @@ export const VisualEditor = defineComponent({
     return () => (
       <div class="visual-editor">
         <div class="visual-editor-menu">
-          visual-editor-menu
+          {props.config.componentList.map(component => <div class="visual-editor-menu-item">
+            <span class="visual-editor-menu-item-label">{component.label}</span>
+            {component.preview()}
+          </div>)}
         </div>
         <div class="visual-editor-head">
           visual-editor-head
