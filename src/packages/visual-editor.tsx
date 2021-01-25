@@ -1,7 +1,7 @@
 // 使用 defineCompoennt可以有更好的类型提示，当然不用是可以的
 import { computed, defineComponent, PropType, ref } from 'vue'
 import './visual-editor.scss'
-import { VisualEditorModelValue, VisualEditorConfig, VisualEditorComponent } from '@/packages/visual-editor.utils'
+import { VisualEditorModelValue, VisualEditorConfig, VisualEditorComponent, createNewBlock } from '@/packages/visual-editor.utils'
 import { useModel } from '@/packages/utils/useModel'
 import { VisualEditorBlock } from './visual-editor-block'
 
@@ -35,7 +35,7 @@ export const VisualEditor = defineComponent({
     }))
 
     // 拖拽
-    const menuDraggier = (() => {
+    const menuDragger = (() => {
 
       let component = null as null | VisualEditorComponent
 
@@ -68,7 +68,7 @@ export const VisualEditor = defineComponent({
       const containerHandler = {
         // 拖拽单组件，进入容器的时候，设置鼠标为可放置状态
         dragenter: (e: DragEvent) => e.dataTransfer!.dropEffect = 'move',
-        // 拖拽但组件，鼠标在容器中移动的时候，禁用默认事件
+        // 拖拽单组件，鼠标在容器中移动的时候，禁用默认事件
         dragover: (e: DragEvent) => e.preventDefault(),
         // 如果拖拽过程中，鼠标离开了容器，设置鼠标为不可放置的状态
         dragleave: (e: DragEvent) => e.dataTransfer!.dropEffect = 'none',
@@ -76,12 +76,17 @@ export const VisualEditor = defineComponent({
         drop: (e: DragEvent) => {
           console.log('drop', component)
           const blocks = dataModel.value.blocks || []
-          blocks.push({
+          // blocks.push({
+          //   top: e.offsetY,
+          //   left: e.offsetX,
+          //   componentKey: component!.key,
+          //   adjustPosition: true
+          // })
+          blocks.push(createNewBlock({
+            component: component!,
             top: e.offsetY,
-            left: e.offsetX,
-            componentKey: component!.key,
-            adjustPosition: true
-          })
+            left: e.offsetX
+          }))
           dataModel.value = {
             ...dataModel.value,
             blocks
@@ -92,14 +97,18 @@ export const VisualEditor = defineComponent({
       return blockHandler
     })()
 
+    // const blockDragger = (() => {
+
+    // })()
+
     return () => (
       <div class="visual-editor">
         <div class="visual-editor-menu">
           {props.config.componentList.map(component => (
             <div class="visual-editor-menu-item"
               draggable
-              onDragstart={e => {menuDraggier.dragstart(e, component)}}
-              onDragend={e => {menuDraggier.dragend}}>
+              onDragstart={e => {menuDragger.dragstart(e, component)}}
+              onDragend={e => {menuDragger.dragend}}>
               <span class="visual-editor-menu-item-label">{component.label}</span>
               {component.preview()}
             </div>
