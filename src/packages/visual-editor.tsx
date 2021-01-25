@@ -1,7 +1,7 @@
 // 使用 defineCompoennt可以有更好的类型提示，当然不用是可以的
 import { computed, defineComponent, PropType, ref } from 'vue'
 import './visual-editor.scss'
-import { VisualEditorModelValue, VisualEditorConfig, VisualEditorComponent, createNewBlock } from '@/packages/visual-editor.utils'
+import { VisualEditorModelValue, VisualEditorConfig, VisualEditorComponent, createNewBlock, VisualEditorBlockData } from '@/packages/visual-editor.utils'
 import { useModel } from '@/packages/utils/useModel'
 import { VisualEditorBlock } from './visual-editor-block'
 
@@ -33,6 +33,17 @@ export const VisualEditor = defineComponent({
       width: `${dataModel.value.container.width}px`,
       height: `${dataModel.value.container.height}px`
     }))
+
+    const methods = {
+      clearFocus: (block?: VisualEditorBlockData) => {
+        let blocks = (dataModel.value.blocks || [])
+        if (!blocks.length) return
+        if (block) {
+          blocks = blocks.filter(item => item !== block)
+        }
+        blocks.forEach(block => block.focus = false)
+      }
+    }
 
     // 拖拽
     const menuDragger = (() => {
@@ -97,6 +108,31 @@ export const VisualEditor = defineComponent({
       return blockHandler
     })()
 
+    const focusHandler = (() => {
+      return {
+        container: {
+          onMousedown: (e: MouseEvent) => {
+            (dataModel.value.blocks || []).forEach(block => block.focus = false)
+            e.stopPropagation()
+            e.preventDefault()
+            methods.clearFocus()
+          }
+        },
+        block: {
+          onMousedown: (e: MouseEvent, block: VisualEditorBlockData) => {
+            e.stopPropagation()
+            e.preventDefault()
+            if (e.shiftKey) {
+              block.focus = !block.focus
+            } else {
+              block.focus = true
+              methods.clearFocus(block)
+            }
+          }
+        }
+      }
+    })()
+
     // const blockDragger = (() => {
 
     // })()
@@ -122,10 +158,21 @@ export const VisualEditor = defineComponent({
         </div>
         <div class="visual-editor-body">
           <div class="visual-editor-content">
-            <div class="visual-eidtor-container" style={containerStyles.value} ref={containerRef}>
+            <div class="visual-eidtor-container"
+              style={containerStyles.value}
+              ref={containerRef}
+              {...{
+                onMousedown: (e: MouseEvent) => focusHandler.container.onMousedown(e)
+              }}>
               { dataModel.value && dataModel.value.blocks && dataModel.value.blocks.length && (
                 dataModel.value.blocks.map((block, index) => (
-                  <VisualEditorBlock config={props.config} block={block} key={index}/>
+                  <VisualEditorBlock
+                    config={props.config}
+                    block={block}
+                    key={index}
+                    {...{
+                      onMousedown: (e: MouseEvent) => focusHandler.block.onMousedown(e, block)
+                    }}/>
                 ))
               )}
             </div>
