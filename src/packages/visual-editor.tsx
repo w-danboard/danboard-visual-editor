@@ -4,6 +4,7 @@ import './visual-editor.scss'
 import { VisualEditorModelValue, VisualEditorConfig, VisualEditorComponent, createNewBlock, VisualEditorBlockData } from '@/packages/visual-editor.utils'
 import { useModel } from '@/packages/utils/useModel'
 import { VisualEditorBlock } from './visual-editor-block'
+import { useVisualCommand } from './utils/visual.command'
 
 export const VisualEditor = defineComponent({
   components: {
@@ -187,6 +188,29 @@ export const VisualEditor = defineComponent({
       return { mousedown }
     })()
 
+    const commander = useVisualCommand()
+
+    const buttons = [
+      {
+        label: '撤销',
+        icon: 'icon-back',
+        handler: commander.undo,
+        tip: 'ctrl+z'
+      },
+      {
+        label: '重做',
+        icon: 'icon-forward',
+        handler: commander.redo,
+        tip: 'ctrl+y, ctrl+shift+z'
+      },
+      {
+        label: '删除',
+        icon: 'icon-delete',
+        handler: commander.delete(),
+        tip: 'ctrl+d, backspace, delete'
+      }
+    ]
+
     return () => (
       <div class="visual-editor">
         <div class="visual-editor-menu">
@@ -201,7 +225,12 @@ export const VisualEditor = defineComponent({
           ))}
         </div>
         <div class="visual-editor-head">
-          visual-editor-head
+          {buttons.map((btn, index) => (
+            <div key={index} class="visual-editor-head-button">
+              {/* <i class={`iconfont ${btn.icon}`}></i> */}
+              <span>{btn.label}</span>
+            </div>
+          ))}
         </div>
         <div class="visual-editor-operator">
           visual-editor-operator
