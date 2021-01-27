@@ -37,11 +37,11 @@ export const VisualEditor = defineComponent({
     // 计算选中与未选中的block数据
     const focusData = computed(() => {
       let focus: VisualEditorBlockData[] = []
-      let unfocus: VisualEditorBlockData[] = []
-      ;(dataModel.value.blocks || []).forEach(block => (block.focus ? focus : unfocus).push(block))
+      let unFocus: VisualEditorBlockData[] = []
+      ;(dataModel.value.blocks || []).forEach(block => (block.focus ? focus : unFocus).push(block))
       return {
         focus,    // 此时选中的数据
-        unfocus   // 此时未选中的数据
+        unFocus   // 此时未选中的数据
       }
     })
 
@@ -54,6 +54,12 @@ export const VisualEditor = defineComponent({
           blocks = blocks.filter(item => item !== block)
         }
         blocks.forEach(block => block.focus = false)
+      },
+      updateBlocks: (blocks: VisualEditorBlockData[]) => {
+        dataModel.value = {
+          ...dataModel.value,
+          blocks
+        }
       }
     }
     // 处理菜单拖拽组件到容器的相关动作
@@ -188,7 +194,11 @@ export const VisualEditor = defineComponent({
       return { mousedown }
     })()
 
-    const commander = useVisualCommand()
+    const commander = useVisualCommand({
+      focusData,
+      updateBlocks:methods.updateBlocks,
+      dataModel
+  });
 
     const buttons = [
       {
@@ -206,7 +216,7 @@ export const VisualEditor = defineComponent({
       {
         label: '删除',
         icon: 'icon-delete',
-        handler: commander.delete(),
+        handler: commander.delete,
         tip: 'ctrl+d, backspace, delete'
       }
     ]
@@ -226,7 +236,7 @@ export const VisualEditor = defineComponent({
         </div>
         <div class="visual-editor-head">
           {buttons.map((btn, index) => (
-            <div key={index} class="visual-editor-head-button">
+            <div key={index} class="visual-editor-head-button" onClick={btn.handler}>
               {/* <i class={`iconfont ${btn.icon}`}></i> */}
               <span>{btn.label}</span>
             </div>

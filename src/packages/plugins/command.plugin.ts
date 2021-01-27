@@ -28,11 +28,27 @@ export function useCommander () {
   const registry = (command: Command) => {
     state.commands[command.name] = (...args) => {
       const { undo, redo } = command.execute(...args)
-      if (command.followQueue) {
-        state.queue.push({ undo, redo })
-        state.current += 1
-      }
       redo()
+      if (command.followQueue === false) {
+        return
+      }
+      // if (command.followQueue !== false) {
+      //   state.queue.push({ undo, redo })
+      //   state.current += 1
+      // }
+      // redo()
+      console.log(state)
+
+      let { queue, current } = state
+      if (queue.length > 0) {
+        queue = queue.slice(0, current + 1)
+        state.queue = queue
+      }
+
+      queue.push({ undo, redo })
+      state.current = current + 1
+      // redo()
+      // ;(!command.doNothingWhenExecute && redo())
     }
   }
 
@@ -42,14 +58,16 @@ export function useCommander () {
     followQueue: false,
     execute: () => {
       // 命令被执行的时候，要做的事情
+      console.log('undo===>')
       return {
         redo: () => {
+          console.log('重做')
           // 重新做一遍，要做的事情
           const { current } = state
           if (current === -1) return
-          const { undo } = state.queue[current]
-          !!undo && undo()
-          state.current -= 1
+          const queueItem = state.queue[state.current]
+          !!queueItem.undo && queueItem.undo()
+          state.current --
         }
       }
     }
@@ -65,11 +83,12 @@ export function useCommander () {
     execute: () => {
       return {
         redo: () => {
-          let { current } = state
-          if (!state.queue[current]) return
-          const { redo } = state.queue[current]
-          redo()
-          state.current += 1
+          console.log('执行撤销')
+          const queueItem = state.queue[state.current + 1]
+          if (!!queueItem) {
+            queueItem.redo()
+            state.current++
+          }
         }
       }
     }
