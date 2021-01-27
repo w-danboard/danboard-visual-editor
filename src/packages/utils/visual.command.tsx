@@ -26,6 +26,7 @@ export function useVisualCommand (
 ) {
   const commander = useCommander()
 
+  // 删除命令
   commander.registry({
     name: 'delete',
     keyboard: [
@@ -57,8 +58,6 @@ export function useVisualCommand (
      * - 从菜单拖拽组件到容器画布；
      * - 在容器中拖拽组件调整位置
      * - 拖拽调整组件的宽度和高度；
-     * @author  韦胜健
-     * @date    2021/1/22 11:38 下午
      */
     commander.registry({
       name: 'drag',
