@@ -32,7 +32,7 @@ export function useVisualCommand (
     keyboard: [
       'backspace',
       'delete',
-      'ctrl+d'
+      'ctrl + d'
     ],
     execute: () => {
       let data = {
@@ -42,11 +42,11 @@ export function useVisualCommand (
       console.log('执行删除命令', data)
       return {
         redo: () => {
-          console.log('撤回删除命令')
+          console.log('重置删除命令')
           updateBlocks(data.after)
         },
         undo: () => {
-          console.log('重置删除命令')
+          console.log('撤回删除命令')
           updateBlocks(data.before)
         }
       }
