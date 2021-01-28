@@ -104,16 +104,14 @@ export function useCommander () {
     state.destroyList.push(() => window.removeEventListener('keydown', onKeydown))
   }
 
+  // 注册撤回命令（撤回命令执行结果不需要进入命令队列）
   registry({
     name: 'undo',
     keyboard: 'ctrl + z',
     followQueue: false,
     execute: () => {
-      // 命令被执行的时候，要做的事情
       return {
         redo: () => {
-          console.log('重做')
-          // 重新做一遍，要做的事情
           const { current } = state
           if (current === -1) return
           const queueItem = state.queue[state.current]
@@ -124,6 +122,7 @@ export function useCommander () {
     }
   })
 
+  // 注册重做命令（重做命令执行结果不需要进入命令队列）
   registry({
     name: 'redo',
     keyboard: [
@@ -134,7 +133,6 @@ export function useCommander () {
     execute: () => {
       return {
         redo: () => {
-          console.log('执行撤销')
           const queueItem = state.queue[state.current + 1]
           if (!!queueItem) {
             queueItem.redo()

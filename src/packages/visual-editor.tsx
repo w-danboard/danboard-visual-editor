@@ -1,5 +1,5 @@
 // 使用 defineCompoennt可以有更好的类型提示，当然不用是可以的
-import { computed, defineComponent, PropType, ref } from 'vue'
+import { computed, defineComponent, PropType, ref, reactive } from 'vue'
 import './visual-editor.scss'
 import { VisualEditorModelValue, VisualEditorConfig, VisualEditorComponent, createNewBlock, VisualEditorBlockData } from '@/packages/visual-editor.utils'
 import { useModel } from '@/packages/utils/useModel'
@@ -44,6 +44,10 @@ export const VisualEditor = defineComponent({
         focus,    // 此时选中的数据
         unFocus   // 此时未选中的数据
       }
+    })
+
+    const state = reactive({
+      selectBlock: null as null | VisualEditorBlockData,          // 当前选中的组件
     })
 
     const dragstart = createEvent()
@@ -150,13 +154,15 @@ export const VisualEditor = defineComponent({
             if (e.currentTarget !== e.target) {
                 return
             }
-            methods.clearFocus()
+            if (!e.shiftKey) {
+                /*点击空白处，清空所有选中的block*/
+                methods.clearFocus()
+                state.selectBlock = null
+            }
           }
         },
         block: {
           onMousedown: (e: MouseEvent, block: VisualEditorBlockData) => {
-            e.stopPropagation()
-            e.preventDefault()
             if (e.shiftKey) {
               // 如果按住shift键，如果此时没有选中的block，就选中这个block，否则block状态取反
               if (focusData.value.focus.length <= 1) {
@@ -172,6 +178,7 @@ export const VisualEditor = defineComponent({
                 methods.clearFocus(block)
               }
             }
+            state.selectBlock = block
             blockDragger.mousedown(e)
           }
         }
