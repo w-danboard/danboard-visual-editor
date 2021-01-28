@@ -6,6 +6,8 @@ import { useModel } from '@/packages/utils/useModel'
 import { VisualEditorBlock } from './visual-editor-block'
 import { useVisualCommand } from './utils/visual.command'
 import { createEvent } from './plugins/event'
+import { $$dialog } from "@/packages/utils/dialog-service";
+import { ElMessageBox } from 'element-plus'
 
 export const VisualEditor = defineComponent({
   components: {
@@ -250,10 +252,44 @@ export const VisualEditor = defineComponent({
         tip: 'ctrl + y, ctrl + shift + z'
       },
       {
+        label: '导入', icon: 'icon-import', handler: async () => {
+            const text = await $$dialog.textarea('', '请输入倒入的JSON字符串')
+            try {
+                const data = JSON.parse(text || '')
+                dataModel.value = data
+            } catch (e) {
+                console.error(e)
+                ElMessageBox.alert('解析json字符串出错')
+            }
+        }
+      },
+      {
+        label: '导出',
+        icon: 'icon-export',
+        handler: () => $$dialog.textarea(JSON.stringify(dataModel.value), '导出的JSON数据', {editReadonly: true})
+      },
+      {
+        label: '置顶', 
+        icon: 'icon-place-top', 
+        handler: () => commander.placeTop(), 
+        tip: 'ctrl + up'
+      },
+      {
+        label: '置底', 
+        icon: 'icon-place-bottom', 
+        handler: () => commander.placeBottom(), 
+        tip: 'ctrl + down'
+      },
+      {
         label: '删除',
         icon: 'icon-delete',
         handler: () => commander.delete(),
         tip: 'ctrl + d, backspace, delete'
+      },
+      {
+        label: '清空', 
+        icon: 'icon-reset', 
+        handler: () => commander.clear()
       }
     ]
 

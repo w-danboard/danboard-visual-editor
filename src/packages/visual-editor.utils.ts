@@ -3,7 +3,11 @@ export interface VisualEditorBlockData {
   top: number,                // 组件的top定位
   left: number,               // 组件的left定位
   adjustPosition?: boolean,   // 是否需要调整位置
-  focus: boolean              // 当前是否为选中状态
+  focus: boolean,             // 当前是否为选中状态
+  zIndex: number,             // z-index值
+  width: number,              // 组件宽度
+  height: number,             // 组件高度
+  hasResize: boolean,         // 是否调整过宽度或者高度
 }
 
 export interface VisualEditorModelValue {
@@ -35,7 +39,11 @@ export function createNewBlock ({
     left,
     componentKey: component!.key,
     adjustPosition: true,
-    focus: false
+    focus: false,
+    zIndex: 0,
+    width: 0,
+    height: 0,
+    hasResize: false
   }
 }
 
